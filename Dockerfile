@@ -19,36 +19,26 @@ RUN wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2
 
 RUN pip install virtualenv
 
-#Creating acs user
-#RUN adduser -U acs
-
 #Creating alma directory
 RUN mkdir /alma 
-#&& chown -R acs:acs /alma
 
-#Changing to acs user
-#USER acs
 
 #Download repo and configurate the enviroment
-RUN git clone -b merges https://github.com/csrg-utfsm/acscb.git  ~/acs-repo && \ 
-    source ~/acs-repo/LGPL/acsBUILD/config/.acs/.bash_profile.acs && \
-    mkdir -p $ALMASW_INSTDIR
+
+COPY acscb  root/acs-repo
 
 RUN echo 'source $HOME/acs-repo/LGPL/acsBUILD/config/.acs/.bash_profile.acs' >> ~/.bashrc && \
     source ~/.bashrc 
 
 RUN 	source ~/.bashrc && \
-	cd ~/acs-repo/ExtProd/PRODUCTS && \
-	./download-products.sh
-
-RUN 	source ~/.bashrc && \
 	cd ~/acs-repo/ExtProd/INSTALL && \
 	./buildTools && \
 	cd $ALMASW_INSTDIR && \
-	find -name "*.o" | xargs rm -rf
+	find -name "*.o" | xargs rm -rf &&\
+	git clean -fx ~/acs-repo/ExtProd/PRODUCTS	
 
 ENV MAKE_NOSTATIC=yes
 ENV MAKE_NOIFR_CHECK=on 
 ENV MAKE_PARS=" -j 2 -l 2 "
 
-RUN source ~/.bashrc && cd ~/acs-repo/ && make
+#RUN source ~/.bashrc && cd ~/acs-repo/ && make
